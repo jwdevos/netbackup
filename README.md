@@ -24,6 +24,10 @@ The overview as given in the project header:
 #  for output. The paths for this are configured via CLI arguments.           #
 #  Run netbackup with the -h argument for more information.                   #
 #                                                                             #
+# Netbackup can e-mail a status report. The report is based on a              #
+#  Jinja2 template which is supplied in the same way as the CSV and           #
+#  ENV files. The report gets mailed via SMTP (tested with Office 365).       #
+#                                                                             #
 # At the top of the script, under "Global variables", supported device types  #
 #  and corresponding API URL's and netmiko commands are defined.              #
 #  Here, support for additional vendors can be added. Adding new vendors      #
@@ -31,7 +35,10 @@ The overview as given in the project header:
 #  enable mode for certain vendors in the netmiko_read function, or support   #
 #  for HTTP POST requests.                                                    #
 #                                                                             #
-# If netbackup is of use to you, feel free to use this code and use           #
+# Supported netmiko platforms are documented here:                            #
+#  https://github.com/ktbyers/netmiko/blob/develop/PLATFORMS.md               #
+#                                                                             #
+# If netbackup is of use to you, feel free to take this code and use          #
 #  it as you see fit. Please let me know how you like it.                     #
 #                                                                             #
 ###############################################################################
