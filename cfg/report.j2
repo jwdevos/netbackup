@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Netbackup report for {{ org }} at {{ date }}</title>
+        <meta name="description" content="Netbackup report for {{ org }} at {{ date }}">
+            <style>
+                table, th, td {
+                    border: 1px solid black;
+                    border-collapse: collapse;
+                    padding: 5px;
+                }
+                th {
+                    background-color: lightgray;
+                }
+            </style>
+    </head>
+
+    <body>
+        <h3>Netbackup report for {{ org }} at {{ date }}</h3>
+        <div>
+            <table>
+                <tr>
+                    <th>Device</th>
+                    <th>Backup Status</th>
+                </tr>
+                {%- for row in status %}
+                <tr>
+                    <td bgcolor="lightgrey">SW1</td>
+                    {%- if row[1] == 'OK' %}
+                    <td bgcolor="lawngreen">OK</td>
+                    {%- endif %}
+                    {%- if row[1] == 'NOT OK' %}
+                    <td bgcolor="orangered">NOT OK</td>
+                    {%- endif %}
+                <tr>
+                {%- endfor %}
+            </table>
+        </div>
+    </body>
+</html>
