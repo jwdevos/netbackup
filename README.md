@@ -44,12 +44,27 @@ The overview as given in the project header:
 ###############################################################################
 ```
 
-### Recommended usage
+### Recommended Usage
 The recommended way to use netbackup is to set up a folder structure something like this:
 ```
-/home/user/python/netbackup/
 /home/user/customers/customer-1/backups/
 /home/user/customers/customer-1/cfg/
 /home/user/customers/customer-1/logs/
 ```
-bla
+Next, create a python venv:
+```
+python3 -m venv netbackup
+```
+Clone the netbackup repo, and put `main.py` and `requirements.txt` in the netbackup venv folder. The assumed path of the netbackup venv folder in these instructions is `/home/user/python/netbackup/`. Activate the venv and install the requirements:
+```
+source bin/activate
+pip install -r requirements.txt
+```
+Next, populate the cfg folder with the CSV file, the ENV file, the report template and the run-script. Don't forget to make the run-script executable:
+```
+chmod +x /home/user/customers/customer-1/cfg/run.sh
+```
+Now, edit CSV file, the ENV file, and the run-script with variables that work for you, then run the run-script to start the backup procedure. You can also adjust the report template if you wish.
+
+### Additional Information
+The current incarnation of netbackup assumes that just a single user/password (the MAIN_USER and MAIN_PASS as set in the ENV file) is enough. If you need per-device flexibility with the user/password, additional logic needs to be added in the script.
