@@ -48,8 +48,8 @@ The overview as given in the project header:
 The recommended way to use netbackup is to set up a folder structure something like this:
 ```
 /home/user/python/netbackup/
-/home/user/customers/test/backups/
-/home/user/customers/test/cfg/
-/home/user/customers/test/logs/
+/home/user/customers/customer-1/backups/
+/home/user/customers/customer-1/cfg/
+/home/user/customers/customer-1/logs/
 ```
 bla
