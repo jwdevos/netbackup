@@ -16,6 +16,10 @@
 #  for output. The paths for this are configured via CLI arguments.           #
 #  Run netbackup with the -h argument for more information.                   #
 #                                                                             #
+# Netbackup can e-mail a status report. The report is based on a              #
+#  Jinja2 template which is supplied in the same way as the CSV and           #
+#  ENV files. The report gets mailed via SMTP (tested with Office 365).       #
+#                                                                             #
 # At the top of the script, under "Global variables", supported device types  #
 #  and corresponding API URL's and netmiko commands are defined.              #
 #  Here, support for additional vendors can be added. Adding new vendors      #
@@ -23,7 +27,10 @@
 #  enable mode for certain vendors in the netmiko_read function, or support   #
 #  for HTTP POST requests.                                                    #
 #                                                                             #
-# If netbackup is of use to you, feel free to use this code and use           #
+# Supported netmiko platforms are documented here:                            #
+#  https://github.com/ktbyers/netmiko/blob/develop/PLATFORMS.md               #
+#                                                                             #
+# If netbackup is of use to you, feel free to take this code and use          #
 #  it as you see fit. Please let me know how you like it.                     #
 #                                                                             #
 ###############################################################################
@@ -34,11 +41,15 @@
 ###############################################################################
 import argparse
 import csv
+import jinja2
 import logging
 import os
 import requests
+import smtplib
 from datetime import datetime
 from dotenv import load_dotenv
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from netmiko import ConnectHandler
 
 
@@ -75,12 +86,13 @@ def main():
     print("########## Starting netbackup at " + get_date() + "-" + get_time() + " ##########")
 
     # Reading the arguments that the script needs to run with,
-    #  to determine the BCK, CSV and ENV paths
+    #  to determine the LOG, BCK, CSV, ENV and REP paths
     args = read_args()
     print("########## Log path: " + args.log + " ##########")
     print("########## Backup path: " + args.bck + " ##########")
     print("########## CSV path: " + args.csv + " ##########")
     print("########## ENV path: " + args.env + " ##########")
+    print("########## Report path: " + args.rep + " ##########")
 
     # Configuring the logging module
     logfile =  args.log + get_date() + '-backup-log.txt'
@@ -95,7 +107,7 @@ def main():
 
     # Loading the env vars
     load_dotenv_file(args.env)
-    logging.info("########## Loaded ENV file ##########")
+    logging.info("########## Loaded ENV file for organization " + os.getenv('ORG') + " ##########")
 
     # Creating an empty array to later store status information in
     status = []
@@ -103,12 +115,12 @@ def main():
     # Reading the input CSV and doing stuff for each entry
     csv_content = load_csv_file(args.csv)
     logging.info("########## Loaded the CSV file ##########")
+    logging.info("")
     for row in csv_content:
         logging.info("########## Starting CSV iteration for " + row[0] +  " ##########")
 
         # Creating a variable to store row status
         row_status = [row[0],'NOT OK']
-        print(row_status)
 
         # Variable to track the communication type (SSH via netmiko, or direct API)
         comm_type = ''
@@ -118,7 +130,7 @@ def main():
 
         # Validation of device_type input
         if row[2] not in netmiko_device_types and row[2] not in api_device_types:
-            logging.error("########## Something wrong with device_type for " + row[0] " ##########")
+            logging.error("########## Something wrong with device_type for " + row[0] + " ##########")
             break
         logging.info("########## CSV input validation successful ##########")
 
@@ -158,6 +170,7 @@ def main():
                 # Calling netmiko_read to get device config data
                 logging.info("########## Calling the netmiko_read function ##########")
                 device_data = netmiko_read(netmiko_device, netmiko_device_commands)
+                logging.info("########## Finished the steps for running netmiko ##########")
 
             case 'api':
                 logging.info("########## Starting the steps for doing an API call ##########")
@@ -177,6 +190,7 @@ def main():
                 # Converting the resonse to text and storing it in the
                 #  variable for the device config data
                 device_data = response.text
+                logging.info("########## Finished the steps for doing an API call ##########")
 
         # If device_data isn't empty, save it to a file and set row_status to OK
         if device_data:
@@ -188,6 +202,32 @@ def main():
         status.append(row_status)
         logging.info("########## Finished CSV iteration for " + row[0] + " ##########")
         logging.info("")
+
+    # Creating a dictionary with the variables that the status report needs
+    report_vars = {}
+    report_vars['org'] = os.getenv('ORG')
+    report_vars['date'] = get_date()
+    report_vars['status'] = status
+
+    # Rendering the status report
+    logging.info("########## Starting with rendering the report ##########")
+    report = render_report(report_vars, args.rep)
+
+    # E-Mail the status report if USE_SMTP is set to 'yes' in the env vars
+    if os.getenv('USE_SMTP') == 'yes':
+        # Creating a dictionary with the variables that the report mailer needs
+        mail_vars = {}
+        mail_vars['smtp_host'] = os.getenv('SMTP_HOST')
+        mail_vars['smtp_port'] = os.getenv('SMTP_PORT')
+        mail_vars['smtp_user'] = os.getenv('SMTP_USER')
+        mail_vars['smtp_pass'] = os.getenv('SMTP_PASS')
+        mail_vars['from'] = os.getenv('SMTP_FROM')
+        mail_vars['to'] = os.getenv('SMTP_TO')
+        mail_vars['subject'] = 'Netbackup report for ' + os.getenv('ORG') + ' at ' + get_date()
+        mail_vars['body'] = report
+
+        # E-Mailing the status report
+        send_mail(mail_vars)
 
     # Logging the end of the script execution
     logging.info("########## Finished netbackup at " + get_date() + "-" + get_time() + "##########")
@@ -202,6 +242,41 @@ def main():
 ###############################################################################
 # Functions                                                                   #
 ###############################################################################
+# Function that e-mails the report
+def send_mail(mail_vars):
+    try:
+        # Creating the e-mail object with HTML Support
+        mail = MIMEMultipart('alternative')
+        mail['Subject'] = mail_vars['subject']
+        mail['From'] = mail_vars['from']
+        mail['To'] = mail_vars['to']
+
+        # Creating the body of the message (a plain-text version and an HTML version)
+        text = "Please enable HTML e-mail support to view this message."
+        html = mail_vars['body']
+
+        # Setting the MIME types of both parts - text/plain and text/html
+        part1 = MIMEText(text, 'plain')
+        part2 = MIMEText(html, 'html')
+
+        # Attaching parts to the e-mail object
+        # The last part of a multipart message (the HTML part) is preferred (RFC 2046)
+        mail.attach(part1)
+        mail.attach(part2)
+
+        # Sending the e-mail object via SMTP
+        mailserver = smtplib.SMTP(mail_vars['smtp_host'], mail_vars['smtp_port'])
+        mailserver.ehlo()
+        mailserver.starttls()
+        mailserver.login(mail_vars['smtp_user'], mail_vars['smtp_pass'])
+        mailserver.sendmail(mail_vars['from'], mail_vars['to'], mail.as_string())
+        mailserver.quit()
+
+    except Exception as e:
+        logging.error(e)
+        print(e)
+
+
 # Function that returns a formatted date
 def get_date():
     return str(datetime.now().date()).replace('-', '')
@@ -263,20 +338,24 @@ def load_dotenv_file(env_path):
 
 # Function that reads the CLI arguments and returns them as a dictionary
 def read_args():
+    # Defining variables with help messages to support the CLI argument function
     help_log = "(Required) Provide a log path, like '/home/user/logs/'"
     help_bck = "(Required) Provide a backup path, like '/home/user/backups/'"
     help_csv = "(Required) Provide a CSV file path, like '/home/user/.csv'"
     help_env = "(Required) Provide a ENV file path, like '/home/user/.env'"
+    help_rep = "(Required) Provide a report file path, like '/home/user/report.j2'"
 
+    # Creating the parser object to read and store CLI arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('-l', '--log', help=help_log)
     parser.add_argument('-b', '--bck', help=help_bck)
     parser.add_argument('-c', '--csv', help=help_csv)
     parser.add_argument('-e', '--env', help=help_env)
-
+    parser.add_argument('-r', '--rep', help=help_env)
     args = parser.parse_args()
 
-    if args.log is None or args.bck is None or args.csv is None or args.env is None:
+    # Checking if all required arguments are set
+    if args.log is None or args.bck is None or args.csv is None or args.env is None or args.rep is None:
         e = "Please provide all required arguments. Use '-h' for more information"
         logging.error(e)
         exit(e)
@@ -284,20 +363,50 @@ def read_args():
     return args
 
 
-# Function that runs a command on a specified device and saves the output in a file
+# Function that uses netmiko to execute a command on a specified device and returns the output
 def netmiko_read(netmiko_device, netmiko_device_commands):
+    # Creating a variable that will hold the output for the specified device
     device_data = ''
     try:
+        # Adding some header information to device_data
         device_data += '####################################\n'
         device_data += '# Output for device ' + netmiko_device['host'] + '\n'
         device_data += '####################################\n\n'
+
+        # Creating the netmiko object
         netmiko_connect = ConnectHandler(**netmiko_device)
+
+        # Running commands via netmiko, depending on the vendor. Any additional
+        #  black magic that's required for particular vendors needs to be added here
         if netmiko_device['device_type'] == 'mikrotik_routeros':
             output = netmiko_connect.send_command_timing(netmiko_device_commands[netmiko_device['device_type']])
         else:
             output = netmiko_connect.send_command(netmiko_device_commands[netmiko_device['device_type']])
+
+        # Add the output data to device_data and return it
         device_data += output
         return device_data
+
+    except Exception as e:
+        logging.error(e)
+        print(e)
+
+
+# Function that renders the report
+def render_report(report_vars, template_path):
+    try:
+        # Supplying the path to the Jinja2 report input file and reading the file
+        report_template_file = template_path
+        with open(report_template_file) as f:
+            report_template = f.read()
+
+        # Creating a Jinja2 object with the template file
+        template = jinja2.Template(report_template)
+
+        # Rendering the report by combining the template with the variables,
+        #  then returning the rendered report
+        report = template.render(report_vars)
+        return report
 
     except Exception as e:
         logging.error(e)
