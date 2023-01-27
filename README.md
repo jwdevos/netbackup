@@ -38,4 +38,11 @@ The overview as given in the project header:
 ```
 
 ### Recommended usage
+The recommended way to use netbackup is to set up a folder structure something like this:
+```
+/home/user/python/netbackup/
+/home/user/customers/test/backups/
+/home/user/customers/test/cfg/
+/home/user/customers/test/logs/
+```
 bla
