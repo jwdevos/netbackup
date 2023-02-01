@@ -66,7 +66,12 @@ Next, populate the cfg folder with the CSV file, the ENV file, the report templa
 ```
 chmod +x /home/user/customers/customer-1/cfg/run.sh
 ```
-Now, edit CSV file, the ENV file, and the run-script with variables that work for you, then run the run-script to start the backup procedure. You can also adjust the report template if you wish.
+Now, edit CSV file, the ENV file, and the run-script with variables that work for you, then run the run-script to start the backup procedure. You can also adjust the report template if you wish.  
+  
+The run-script is also compatible with cron jobs without much hassle, mostly thanks to the explicit paths everywhere. As an example, the following crontab entry will run netbackup every Sunday at 01:00:
+```
+0 1 * * 0 /home/user/customers/customer-1/cfg/run.sh >> /home/user/customers/customer-1/cronlogs/cronlog.txt 2>&1
+```
 
 ### Additional Information
 - The current incarnation of netbackup assumes that just a single user/password (the MAIN_USER and MAIN_PASS as set in the ENV file) is enough. If you need per-device flexibility with the user/password, additional logic needs to be added in the script
