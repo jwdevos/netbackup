@@ -69,4 +69,5 @@ chmod +x /home/user/customers/customer-1/cfg/run.sh
 Now, edit CSV file, the ENV file, and the run-script with variables that work for you, then run the run-script to start the backup procedure. You can also adjust the report template if you wish.
 
 ### Additional Information
-The current incarnation of netbackup assumes that just a single user/password (the MAIN_USER and MAIN_PASS as set in the ENV file) is enough. If you need per-device flexibility with the user/password, additional logic needs to be added in the script.
+- The current incarnation of netbackup assumes that just a single user/password (the MAIN_USER and MAIN_PASS as set in the ENV file) is enough. If you need per-device flexibility with the user/password, additional logic needs to be added in the script
+- Using Mikrotik devices in your CSV will make netbackup considerably slower. This is a result of the way the Mikrotik CLI prompt works when exporting the current configuration, combined with how Python libraries like netmiko have to determine whether or not the export command has finished. I opted for a minute-long hard-coded time-out to make sure Mikrotik backups are working properly in most situations
