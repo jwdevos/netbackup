@@ -3,7 +3,7 @@
   
 The purpose of netbackup is to make configuration backups of network devices from multiple vendors, via multiple communication channels.
 
-![Report Screenshot](report_screenshot.jpg)
+![Report Screenshot](report_screenshot.jpg | width=250)
 
 ### Overview
 The overview as given in the script header:
