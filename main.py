@@ -9,8 +9,9 @@
 #  library) and HTTP GET (to device API's) are supported.                     #
 #                                                                             #
 # Netbackup was tested for Mikrotik (RouterOS), UBNT (EdgeSwitch),            #
-#  and Fortinet (FortiGates). If a vendor has netmiko or API support, adding  #
-#  them to netbackup should require only a minimum amount of work.            #
+#  Cisco Small Business switches, and Fortinet (FortiGates).                  #
+#  If a vendor has netmiko or API support, adding them to netbackup           #
+#  should require only a minimum amount of work.                              #
 #                                                                             #
 # Netbackup uses CSV and ENV files as input, and backup and log directories   #
 #  for output. The paths for this are configured via CLI arguments.           #
@@ -69,11 +70,13 @@ api_strings = {
 #  commands, in an array and a dictionary
 netmiko_device_types = [
     'mikrotik_routeros',
-    'ubiquiti_edgeswitch'
+    'ubiquiti_edgeswitch',
+    'cisco_s300'
 ]
 netmiko_device_commands = {
     'mikrotik_routeros': 'export',
-    'ubiquiti_edgeswitch': 'show run'
+    'ubiquiti_edgeswitch': 'show run',
+    'cisco_s300': 'show run'
 }
 
 
@@ -163,7 +166,6 @@ def main():
                     'username': user,
                     'password': pw,
                     'secret': pw,
-                    'global_delay_factor': 4,
                     'device_type': row[2]
                 }
 
@@ -235,7 +237,7 @@ def main():
 
     # Printing the script execution time
     end_time = datetime.now()
-    logging.info("########## Total execution time: {end_time - start_time} ##########")
+    logging.info(f"########## Total execution time: {end_time - start_time} ##########")
     print(f"########## Total execution time: {end_time - start_time} ##########")
 
 
@@ -373,14 +375,20 @@ def netmiko_read(netmiko_device, netmiko_device_commands):
         device_data += '# Output for device ' + netmiko_device['host'] + '\n'
         device_data += '####################################\n\n'
 
-        # Creating the netmiko object
-        netmiko_connect = ConnectHandler(**netmiko_device)
-
         # Running commands via netmiko, depending on the vendor. Any additional
         #  black magic that's required for particular vendors needs to be added here
         if netmiko_device['device_type'] == 'mikrotik_routeros':
-            output = netmiko_connect.send_command_timing(netmiko_device_commands[netmiko_device['device_type']])
+            # Creating the netmiko object
+            netmiko_connect = ConnectHandler(**netmiko_device)
+
+            # Running netmiko_send_command_timing and storing the output
+            output = netmiko_connect.send_command_timing(netmiko_device_commands[netmiko_device['device_type']],last_read=60)
+
         else:
+            # Creating the netmiko object
+            netmiko_connect = ConnectHandler(**netmiko_device)
+
+            # Running netmiko_send_command and storing the output
             output = netmiko_connect.send_command(netmiko_device_commands[netmiko_device['device_type']])
 
         # Add the output data to device_data and return it
