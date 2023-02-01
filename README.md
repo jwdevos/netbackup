@@ -17,8 +17,9 @@ The overview as given in the script header:
 #  library) and HTTP GET (to device API's) are supported.                     #
 #                                                                             #
 # Netbackup was tested for Mikrotik (RouterOS), UBNT (EdgeSwitch),            #
-#  and Fortinet (FortiGates). If a vendor has netmiko or API support, adding  #
-#  them to netbackup should require only a minimum amount of work.            #
+#  Cisco Small Business switches, and Fortinet (FortiGates).                  #
+#  If a vendor has netmiko or API support, adding them to netbackup           #
+#  should require only a minimum amount of work.                              #
 #                                                                             #
 # Netbackup uses CSV and ENV files as input, and backup and log directories   #
 #  for output. The paths for this are configured via CLI arguments.           #
