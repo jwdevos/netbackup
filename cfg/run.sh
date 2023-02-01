@@ -11,7 +11,7 @@ ENV_PATH=$ROOT_PATH"cfg/.env"
 REP_PATH=$ROOT_PATH"cfg/report.j2"
 
 # Activating the python venv that contains the netbackup script
-source /home/jaap/python/netbackup/bin/activate
+source /home/user/python/netbackup/bin/activate
 
 # Running the netbackup script, while supplying the path variables via CLI arguments
-python /home/jaap/python/netbackup/main.py -l $LOG_PATH -b $BCK_PATH -c $CSV_PATH -e $ENV_PATH -r $REP_PATH
+python /home/user/python/netbackup/main.py -l $LOG_PATH -b $BCK_PATH -c $CSV_PATH -e $ENV_PATH -r $REP_PATH
