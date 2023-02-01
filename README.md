@@ -62,7 +62,7 @@ Clone the netbackup repo, and put `main.py` and `requirements.txt` in the netbac
 source bin/activate
 pip install -r requirements.txt
 ```
-Next, populate the cfg folder with the CSV file, the ENV file, the report template and the run-script. Don't forget to make the run-script executable:
+Next, populate the cfg folder with the CSV file, the ENV file, the report template and the run-script. Set the ROOT_PATH variable in the run-script to correspond with the folder structure that was setup before. Don't forget to make the run-script executable:
 ```
 chmod +x /home/user/customers/customer-1/cfg/run.sh
 ```
