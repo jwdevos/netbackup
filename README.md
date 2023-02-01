@@ -51,6 +51,7 @@ The recommended way to use netbackup is to set up a folder structure something l
 /home/user/customers/customer-1/backups/
 /home/user/customers/customer-1/cfg/
 /home/user/customers/customer-1/logs/
+/home/user/customers/customer-1/cronlogs/
 ```
 Next, create a python venv:
 ```
