@@ -229,6 +229,7 @@ def main():
         mail_vars['body'] = report
 
         # E-Mailing the status report
+        logging.info("########## Sending the report ##########")
         send_mail(mail_vars)
 
     # Logging the end of the script execution
