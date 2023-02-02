@@ -245,41 +245,6 @@ def main():
 ###############################################################################
 # Functions                                                                   #
 ###############################################################################
-# Function that e-mails the report
-def send_mail(mail_vars):
-    try:
-        # Creating the e-mail object with HTML Support
-        mail = MIMEMultipart('alternative')
-        mail['Subject'] = mail_vars['subject']
-        mail['From'] = mail_vars['from']
-        mail['To'] = mail_vars['to']
-
-        # Creating the body of the message (a plain-text version and an HTML version)
-        text = "Please enable HTML e-mail support to view this message."
-        html = mail_vars['body']
-
-        # Setting the MIME types of both parts - text/plain and text/html
-        part1 = MIMEText(text, 'plain')
-        part2 = MIMEText(html, 'html')
-
-        # Attaching parts to the e-mail object
-        # The last part of a multipart message (the HTML part) is preferred (RFC 2046)
-        mail.attach(part1)
-        mail.attach(part2)
-
-        # Sending the e-mail object via SMTP
-        mailserver = smtplib.SMTP(mail_vars['smtp_host'], mail_vars['smtp_port'])
-        mailserver.ehlo()
-        mailserver.starttls()
-        mailserver.login(mail_vars['smtp_user'], mail_vars['smtp_pass'])
-        mailserver.sendmail(mail_vars['from'], mail_vars['to'], mail.as_string())
-        mailserver.quit()
-
-    except Exception as e:
-        logging.error(e)
-        print(e)
-
-
 # Function that returns a formatted date
 def get_date():
     return str(datetime.now().date()).replace('-', '')
@@ -416,6 +381,41 @@ def render_report(report_vars, template_path):
         #  then returning the rendered report
         report = template.render(report_vars)
         return report
+
+    except Exception as e:
+        logging.error(e)
+        print(e)
+
+
+# Function that e-mails the report
+def send_mail(mail_vars):
+    try:
+        # Creating the e-mail object with HTML Support
+        mail = MIMEMultipart('alternative')
+        mail['Subject'] = mail_vars['subject']
+        mail['From'] = mail_vars['from']
+        mail['To'] = mail_vars['to']
+
+        # Creating the body of the message (a plain-text version and an HTML version)
+        text = "Please enable HTML e-mail support to view this message."
+        html = mail_vars['body']
+
+        # Setting the MIME types of both parts - text/plain and text/html
+        part1 = MIMEText(text, 'plain')
+        part2 = MIMEText(html, 'html')
+
+        # Attaching parts to the e-mail object
+        # The last part of a multipart message (the HTML part) is preferred (RFC 2046)
+        mail.attach(part1)
+        mail.attach(part2)
+
+        # Sending the e-mail object via SMTP
+        mailserver = smtplib.SMTP(mail_vars['smtp_host'], mail_vars['smtp_port'])
+        mailserver.ehlo()
+        mailserver.starttls()
+        mailserver.login(mail_vars['smtp_user'], mail_vars['smtp_pass'])
+        mailserver.sendmail(mail_vars['from'], mail_vars['to'], mail.as_string())
+        mailserver.quit()
 
     except Exception as e:
         logging.error(e)
