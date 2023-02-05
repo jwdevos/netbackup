@@ -66,13 +66,13 @@ pip install -r requirements.txt
 ```
 Next, populate the cfg folder with the CSV file, the ENV file, the report template and the run-script. Set the ROOT_PATH variable in the run-script to correspond with the folder structure that was setup before. Don't forget to make the run-script executable:
 ```
-chmod +x /home/user/customers/customer-1/cfg/run.sh
+chmod +x /home/user/customers/customer-1/cfg/netbackup-run.sh
 ```
 Now, edit CSV file, the ENV file, and the run-script with variables that work for you, then run the run-script to start the backup procedure. You can also adjust the report template if you wish.  
   
 The run-script is also compatible with cron jobs without much hassle, mostly thanks to the explicit paths everywhere. As an example, the following crontab entry will run netbackup every Sunday at 01:00. The output of the cron job will be logged:
 ```
-0 1 * * 0 /home/user/customers/customer-1/cfg/run.sh >> /home/user/customers/customer-1/cronlogs/cronlog.txt 2>&1
+0 1 * * 0 /home/user/customers/customer-1/cfg/netbackup-run.sh >> /home/user/customers/customer-1/cronlogs/cronlog.txt 2>&1
 ```
 
 ### Additional Information
