@@ -72,7 +72,7 @@ Now, edit CSV file, the ENV file, and the run-script with variables that work fo
   
 The run-script is also compatible with cron jobs without much hassle, mostly thanks to the explicit paths everywhere. As an example, the following crontab entry will run netbackup every Sunday at 01:00. The output of the cron job will be logged:
 ```
-0 1 * * 0 /home/user/customers/customer-1/cfg/netbackup-run.sh >> /home/user/customers/customer-1/cronlogs/cronlog.txt 2>&1
+0 1 * * 0 /home/user/customers/customer-1/cfg/netbackup-run.sh >> /home/user/customers/customer-1/cronlogs/netbackup-cronlog.txt 2>&1
 ```
 
 ### Additional Information
