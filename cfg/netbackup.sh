@@ -8,7 +8,7 @@ LOG_PATH=$ROOT_PATH"logs/"
 BCK_PATH=$ROOT_PATH"backups/"
 CSV_PATH=$ROOT_PATH"cfg/.csv.example"
 ENV_PATH=$ROOT_PATH"cfg/.env.example"
-REP_PATH=$ROOT_PATH"cfg/report.j2"
+REP_PATH=$ROOT_PATH"cfg/netbackup-report.j2"
 
 # Activating the python venv that contains the netbackup script
 source /home/user/python/netbackup/bin/activate
