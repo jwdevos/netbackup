@@ -6,8 +6,8 @@ ROOT_PATH="/home/user/customers/customer-1/"
 # Setting the paths to the required directories based on the root path
 LOG_PATH=$ROOT_PATH"logs/"
 BCK_PATH=$ROOT_PATH"backups/"
-CSV_PATH=$ROOT_PATH"cfg/.csv"
-ENV_PATH=$ROOT_PATH"cfg/.env"
+CSV_PATH=$ROOT_PATH"cfg/.csv.example"
+ENV_PATH=$ROOT_PATH"cfg/.env.example"
 REP_PATH=$ROOT_PATH"cfg/report.j2"
 
 # Activating the python venv that contains the netbackup script
