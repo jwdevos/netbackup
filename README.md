@@ -1,3 +1,5 @@
+**-- this repo will be archived and moved to https://codeberg.org/jwdevos/netbackup --**
+
 # netbackup
 ![Supported Versions](https://img.shields.io/badge/python-3.10+-blue)  
   
